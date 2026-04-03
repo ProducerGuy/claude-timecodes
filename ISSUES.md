@@ -37,7 +37,7 @@
 
 | Issue | Ask | Addressed? | How |
 |-------|-----|------------|-----|
-| [#2441](https://github.com/anthropics/claude-code/issues/2441) (28 upvotes) | Timestamp every message in CLI UI | **Partial** | `systemMessage` shows after Claude's response. User messages get timecoded in Claude's context. Can't modify Claude Code's UI renderer (Anthropic-only). CLI `view` command shows full timestamps on every message. |
+| [#2441](https://github.com/anthropics/claude-code/issues/2441) (28 upvotes) | Timestamp every message in CLI UI | **Yes** | `systemMessage` fires on all three events — user message, tool call, and Claude response. Every exchange shows a visible timestamp. Only limitation: can't right-align inside the message bubble (requires Anthropic UI change). CLI `view` and web viewer show full per-message timestamps. |
 | [#21051](https://github.com/anthropics/claude-code/issues/21051) (14 upvotes) | Visible timestamps for tracking/debugging | **Yes** | Live hooks + CLI search/view + web viewer. |
 | [#30745](https://github.com/anthropics/claude-code/issues/30745) (9 upvotes) | HH:MM:SS, correlate with server logs | **Yes** | `--format short` shows time only. Second-precision timestamps with timezone. |
 | [#34186](https://github.com/anthropics/claude-code/issues/34186) (4 upvotes) | Timestamps visible to the model | **Yes** | `UserPromptSubmit` hook injects timecode into `additionalContext` every message. Claude sees and can reference exact times. |
@@ -45,7 +45,7 @@
 | [#33009](https://github.com/anthropics/claude-code/issues/33009) (2 upvotes) | Timestamps on tool use output | **Yes** | `PostToolUse` hook injects timecode with tool name into Claude's context. |
 | [#32495](https://github.com/anthropics/claude-code/issues/32495) (1 upvote) | Elapsed time calculations | **Yes** | Claude sees consecutive timecodes, can compute duration between any two messages. |
 | [#41389](https://github.com/anthropics/claude-code/issues/41389) | Timestamps in conversation context | **Yes** | All three hook events inject timestamps. "What did I work on yesterday?" answerable via CLI `search --date`. |
-| [#41072](https://github.com/anthropics/claude-code/issues/41072) | Show timestamps on chat messages | **Partial** | Same as #2441 — can't modify Claude Code's message renderer, but `systemMessage` + CLI + web viewer cover the gap. |
+| [#41072](https://github.com/anthropics/claude-code/issues/41072) | Show timestamps on chat messages | **Yes** | `systemMessage` on all three hook events. Every exchange gets a visible timestamp. |
 | [#28717](https://github.com/anthropics/claude-code/issues/28717) | Configurable timestamp format | **Yes** | `--format` flag: `full`, `short`, `24h`, `iso`. |
 | [#28531](https://github.com/anthropics/claude-code/issues/28531) | "Even `script` from 1979 does this" | **Yes** | And we go further — search, export, web viewer, travel-aware dual timezone. |
 | [#33862](https://github.com/anthropics/claude-code/issues/33862) | Session list with absolute dates + per-message | **Yes** | `sessions` command shows absolute dates, duration, message count. `view` shows per-message timestamps. |
@@ -54,9 +54,9 @@
 | [#18551](https://github.com/anthropics/claude-code/issues/18551) | Detect time gaps, temporal context | **Yes** | Claude sees timecodes. CLI `at` command jumps to any timecode. |
 | [#23655](https://github.com/anthropics/claude-code/issues/23655) | Inject local time into context | **Yes** | Exactly what the `UserPromptSubmit` hook does. |
 | [#26088](https://github.com/anthropics/claude-code/issues/26088) | tmux hides shell prompt timestamps | **Yes** | Hook-based timestamps work regardless of terminal — tmux, screen, SSH, whatever. |
-| [#30144](https://github.com/anthropics/claude-code/issues/30144) | Per-message timestamps like Slack/Discord | **Partial** | CLI and web viewer show per-message timestamps. Live in-session display is via `systemMessage` (not inline like Slack). |
+| [#30144](https://github.com/anthropics/claude-code/issues/30144) | Per-message timestamps like Slack/Discord | **Yes** | `systemMessage` on every exchange + CLI and web viewer for review. Formatting differs from Slack (not inline in bubble) but every message gets a visible timestamp. |
 | [#31271](https://github.com/anthropics/claude-code/issues/31271) | Correlate activity across windows | **Yes** | Timestamps are absolute with timezone. Same message shows same time regardless of which window you're in. |
 | [#32949](https://github.com/anthropics/claude-code/issues/32949) | Correlate with deploys, CI runs, API usage | **Yes** | Second-precision timestamps with timezone. `--format iso` for machine-parseable output. |
 | [#18582](https://github.com/anthropics/claude-code/issues/18582) | Expose timestamps to Claude for elapsed time | **Yes** | Same as #32495. |
 
-**Summary:** 18 of 21 fully addressed. 3 partially addressed (inline UI rendering requires Anthropic to change Claude Code's message renderer — no third-party tool can do this).
+**Summary:** 21 of 21 addressed. Every exchange gets a visible timestamp via `systemMessage` hooks. The only cosmetic limitation is positioning — timestamps appear as system messages rather than right-aligned inside message bubbles, which would require Anthropic to modify Claude Code's renderer.

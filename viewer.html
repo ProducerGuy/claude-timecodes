@@ -99,6 +99,7 @@ let allSessions = [];
 let allMessages = {};
 let currentSession = null;
 let searchTimeout = null;
+let userName = 'You';
 
 async function fetchJSON(url) {
   const res = await fetch(url);
@@ -156,6 +157,8 @@ function highlightText(text, query) {
 }
 
 async function loadSessions() {
+  const config = await fetchJSON('/api/config');
+  userName = config.displayName || 'You';
   allSessions = await fetchJSON('/api/sessions');
   allSessions.sort((a, b) => new Date(b.first_ts) - new Date(a.first_ts));
   renderSessionList(allSessions);
@@ -206,7 +209,7 @@ async function loadConversation(sessionId) {
 
   conv.innerHTML = messages.map((msg, i) => {
     const tc = formatTimecode(msg.timestamp);
-    const role = msg.type === 'user' ? 'You' : 'Claude';
+    const role = msg.type === 'user' ? userName : 'Claude';
     const roleClass = msg.type === 'user' ? 'role-user' : 'role-claude';
     const bodyClass = msg.type === 'user' ? 'user-body' : 'claude-body';
     const content = extractText(msg.message?.content || '');
@@ -284,7 +287,7 @@ function doSearch(query) {
 
       conv.innerHTML = results.map(r => {
         const tc = formatTimecode(r.timestamp);
-        const role = r.type === 'user' ? 'You' : 'Claude';
+        const role = r.type === 'user' ? userName : 'Claude';
         const roleClass = r.type === 'user' ? 'role-user' : 'role-claude';
         const content = truncate(extractText(r.content), 300);
         return `<div class="search-result" data-session="${r.session_id}">

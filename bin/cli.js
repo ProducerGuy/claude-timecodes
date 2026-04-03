@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-import { parseArgs } from "util";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import {
   getAllSessions,
   enrichSession,
@@ -12,7 +14,7 @@ import {
   formatDuration,
   findSessionFile,
 } from "../lib/sessions.js";
-import { Y, G, B, C, DIM, BOLD, R } from "../lib/colors.js";
+import { yellow, green, blue, cyan, dim, bold, reset } from "../lib/colors.js";
 import { getDisplayName } from "../lib/config.js";
 
 const USER_NAME = getDisplayName();
@@ -54,6 +56,13 @@ const command = args[0];
 
 if (!command || command === "-h" || command === "--help") {
   console.log(HELP);
+  process.exit(0);
+}
+
+if (command === "-v" || command === "--version") {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+  console.log(`claude-timecodes v${pkg.version}`);
   process.exit(0);
 }
 
@@ -108,9 +117,9 @@ switch (command) {
       const start = fmtTC(s.firstTs, fmt);
       const end = fmtTC(s.lastTs, fmt);
       const dur = s.firstTs && s.lastTs ? formatDuration(s.lastTs - s.firstTs) : "";
-      console.log(`${Y}${start}${R}  ${DIM}→${R}  ${Y}${end}${R}  ${DIM}(${dur}, ${s.messageCount} msgs)${R}`);
-      console.log(`  ${C}${s.sessionId}${R}`);
-      if (s.preview) console.log(`  ${G}${s.preview}${R}`);
+      console.log(`${yellow}${start}${reset}  ${dim}→${reset}  ${yellow}${end}${reset}  ${dim}(${dur}, ${s.messageCount} msgs)${reset}`);
+      console.log(`  ${cyan}${s.sessionId}${reset}`);
+      if (s.preview) console.log(`  ${green}${s.preview}${reset}`);
       console.log();
     }
     break;
@@ -141,9 +150,9 @@ switch (command) {
       const tc = fmtTC(ts, fmt);
       const content = extractText(msg.message?.content || "");
       const role = msg.type === "user" ? USER_NAME : "Claude";
-      const roleColor = msg.type === "user" ? G : B;
+      const roleColor = msg.type === "user" ? green : blue;
 
-      console.log(`\n${Y}[${tc}]${R} ${roleColor}${BOLD}${role}:${R}`);
+      console.log(`\n${yellow}[${tc}]${reset} ${roleColor}${bold}${role}:${reset}`);
       if (!opts.full && content.length > 500) {
         console.log(`  ${truncate(content, 500)}`);
       } else {
@@ -193,17 +202,17 @@ switch (command) {
       break;
     }
 
-    console.log(`${BOLD}${limited.length} results:${R}\n`);
+    console.log(`${bold}${limited.length} results:${reset}\n`);
     let curSession = null;
     for (const r of limited) {
       if (r.sessionId !== curSession) {
         curSession = r.sessionId;
-        console.log(`${DIM}--- session ${C}${curSession}${R}${DIM} ---${R}`);
+        console.log(`${dim}--- session ${cyan}${curSession}${reset}${dim} ---${reset}`);
       }
       const tc = fmtTC(r.ts, fmt);
-      const roleColor = r.type === "user" ? G : B;
+      const roleColor = r.type === "user" ? green : blue;
       const role = r.type === "user" ? USER_NAME : "Claude";
-      console.log(`  ${Y}[${tc}]${R} ${roleColor}${role}:${R} ${truncate(r.content, 150)}`);
+      console.log(`  ${yellow}[${tc}]${reset} ${roleColor}${role}:${reset} ${truncate(r.content, 150)}`);
     }
     console.log();
     break;
@@ -249,8 +258,8 @@ switch (command) {
       break;
     }
 
-    console.log(`${DIM}Session: ${C}${bestSession.sessionId}${R}`);
-    console.log(`${DIM}Nearest match is ${Math.round(bestDist / 1000)}s from target${R}\n`);
+    console.log(`${dim}Session: ${cyan}${bestSession.sessionId}${reset}`);
+    console.log(`${dim}Nearest match is ${Math.round(bestDist / 1000)}s from target${reset}\n`);
 
     const start = Math.max(0, bestIdx - ctx);
     const end = Math.min(bestMessages.length, bestIdx + ctx + 1);
@@ -261,10 +270,10 @@ switch (command) {
       const tc = fmtTC(ts, fmt);
       const content = extractText(msg.message?.content || "");
       const marker = i === bestIdx ? " >>> " : "     ";
-      const roleColor = msg.type === "user" ? G : B;
+      const roleColor = msg.type === "user" ? green : blue;
       const role = msg.type === "user" ? USER_NAME : "Claude";
 
-      console.log(`${marker}${Y}[${tc}]${R} ${roleColor}${BOLD}${role}:${R}`);
+      console.log(`${marker}${yellow}[${tc}]${reset} ${roleColor}${bold}${role}:${reset}`);
       console.log(`       ${truncate(content, 200)}`);
       console.log();
     }

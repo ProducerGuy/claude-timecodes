@@ -1,19 +1,26 @@
 {
   "name": "claude-timecodes",
-  "version": "0.1.0",
-  "description": "Live timestamps for Claude Code conversations — hooks, CLI search, and web viewer",
+  "version": "1.0.0",
+  "description": "Live timestamps and speaker labels for every Claude Code conversation — hooks, CLI search, and web viewer",
   "bin": {
     "claude-timecodes": "./bin/cli.js"
   },
   "type": "module",
   "license": "MIT",
+  "author": "ProducerGuy",
+  "homepage": "https://github.com/ProducerGuy/claude-timecodes#readme",
+  "bugs": {
+    "url": "https://github.com/ProducerGuy/claude-timecodes/issues"
+  },
   "keywords": [
     "claude",
     "claude-code",
     "timestamps",
     "timecodes",
     "conversation-history",
-    "cli"
+    "speaker-labels",
+    "cli",
+    "hooks"
   ],
   "repository": {
     "type": "git",
@@ -26,6 +33,7 @@
     "bin/",
     "lib/",
     "viewer.html",
-    "hooks/"
+    "hooks/",
+    "LICENSE"
   ]
 }

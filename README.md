@@ -1,12 +1,12 @@
 # Claude Timecodes
 
-Live timestamps for every Claude Code conversation. Hooks inject timecodes into every exchange so both you and Claude can reference them. CLI and web viewer let you search, browse, and export your full conversation history by time.
+Live timestamps and speaker labels for every Claude Code conversation. Every exchange shows who said what and when — visible to both you and Claude. Search, browse, and export your full conversation history by time and speaker.
 
 **Zero dependencies.** Pure Node.js stdlib. Works with all existing sessions.
 
 ## Why
 
-Claude Code stores timestamps on every message but never shows them. You can't see when a conversation happened, Claude can't reason about time, and searching old sessions is guesswork. 21 issues filed on [anthropics/claude-code](https://github.com/anthropics/claude-code) asking for this — zero shipped.
+Claude Code stores timestamps on every message but never shows them. You can't see when a conversation happened, you can't tell who said what at a glance, and Claude can't reason about time. 25 issues filed on [anthropics/claude-code](https://github.com/anthropics/claude-code) asking for this — zero shipped.
 
 This fixes it.
 
@@ -19,17 +19,29 @@ npx claude-timecodes install
 That's it. The installer:
 1. Copies the hook script to `~/.claude/timecode.sh`
 2. Adds hooks to `~/.claude/settings.json` (UserPromptSubmit, Stop, PostToolUse)
-3. Auto-detects your home timezone and saves it to `~/.claude/timecodes.json`
+3. Auto-detects your display name from your Anthropic account
+4. Auto-detects your home timezone
+5. Saves config to `~/.claude/timecodes.json`
 
-Every Claude Code session from that point forward shows timestamps on every exchange.
+Every Claude Code session from that point forward shows timestamped speaker labels on every exchange.
 
 ## What You Get
 
-### Live timestamps in every conversation
+### Live speaker labels and timestamps
 
-When you send a message, Claude sees `[TIMECODE 2026-04-03 02:44:51 PM CDT]` in its context. When Claude finishes responding, you see `2:44:51 PM CDT` as a system message. Tool calls get timestamped too.
+Every exchange shows who said it and when:
 
-This means Claude can answer questions like "how long did that take?" or "what did I do an hour ago?" because it has the actual timecodes.
+```
+Producer · 2:44:51 PM CDT
+Claude · 2:44:53 PM CDT
+Claude · 2:44:55 PM CDT · Bash
+```
+
+- Your messages show your Anthropic display name (e.g. `Producer`)
+- Claude's responses show `Claude`
+- Tool calls show `Claude` with the tool name (e.g. `Bash`, `Edit`, `Read`)
+
+Claude also sees timecodes in its context, so it can answer questions like "how long did that take?" or "what did I work on an hour ago?"
 
 ### CLI search and browse
 
@@ -42,6 +54,10 @@ claude-timecodes view <session-id>
 
 # Search across all conversations
 claude-timecodes search "authentication bug"
+
+# Search only your messages or only Claude's
+claude-timecodes search "bug" --role me
+claude-timecodes search "bug" --role claude
 
 # Filter by date
 claude-timecodes search --date 2026-04-01
@@ -76,20 +92,25 @@ Partial session IDs work — you only need the first few characters.
 On install, your home timezone is auto-detected. When you're home, timestamps are clean:
 
 ```
-02:44:51 PM CDT
+Producer · 2:44:51 PM CDT
 ```
 
 When you travel, both timezones show automatically:
 
 ```
-04:44:51 AM JST (02:44:51 PM CDT)
+Producer · 4:44:51 AM JST (2:44:51 PM CDT)
 ```
 
-Your boss sees your home time. You see local time. No confusion.
+Your local time is primary. Your home time shows in parentheses so teammates and logs stay in sync. When you're home, the parenthetical doesn't appear.
+
+### Configuration
 
 ```bash
-# Check current timezone config
+# Show current config
 claude-timecodes config
+
+# Change display name
+claude-timecodes config --name "Your Name"
 
 # Change home timezone
 claude-timecodes config --timezone America/New_York
@@ -128,10 +149,10 @@ Removes the hooks from settings.json. Your conversation data is untouched.
 Claude Code already stores ISO 8601 timestamps on every message in JSONL files at `~/.claude/projects/`. This tool:
 
 1. **Hooks** — A bash script (`~/.claude/timecode.sh`) fires on three events:
-   - `UserPromptSubmit` — injects timecode into Claude's context via `additionalContext`
-   - `Stop` — shows timecode to user via `systemMessage`
-   - `PostToolUse` — injects tool timecode into Claude's context
-2. **CLI** — Reads the JSONL files, parses timestamps, converts to local time, and presents them with color-coded output
+   - `UserPromptSubmit` — shows `Producer · 2:44:51 PM CDT` to user, injects timecode into Claude's context
+   - `Stop` — shows `Claude · 2:44:53 PM CDT` to user
+   - `PostToolUse` — shows `Claude · 2:44:55 PM CDT · Bash` to user, injects tool timecode into Claude's context
+2. **CLI** — Reads the JSONL files, parses timestamps, converts to local time, and presents them with speaker labels and color-coded output
 3. **Web viewer** — Local HTTP server serving a single-page app that hits JSON APIs backed by the same JSONL parser
 
 ## Requirements
@@ -142,4 +163,4 @@ Claude Code already stores ISO 8601 timestamps on every message in JSONL files a
 
 ## Community Requests
 
-This project addresses [21 open and closed issues](ISSUES.md) on anthropics/claude-code requesting timestamps. See ISSUES.md for the full list with authors and details.
+This project addresses [25 open and closed issues](ISSUES.md) on anthropics/claude-code requesting timestamps and speaker labels. See ISSUES.md for the full list with authors, details, and coverage status.

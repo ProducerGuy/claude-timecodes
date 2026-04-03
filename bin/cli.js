@@ -40,6 +40,7 @@ Options:
   -f, --full            Show full message content
   -o, --output <file>   Output file for export
   -p, --port <N>        Port for web viewer (default 8420)
+  -r, --role <ROLE>     Filter by speaker: you/me/user or claude/assistant
   --format <FMT>        Timestamp format: full (default), short (h:mm:ss AM/PM), 24h, iso
   -h, --help            Show this help
 `;
@@ -70,6 +71,7 @@ function parseOpts(positionals = 0) {
     else if (f === "-p" || f === "--port") opts.port = parseInt(flags[++i]);
     else if (f === "--format") opts.format = flags[++i];
     else if (f === "--timezone") opts.timezone = flags[++i];
+    else if (f === "--role" || f === "-r") opts.role = flags[++i];
     else pos.push(f);
   }
   return { pos, opts };
@@ -156,6 +158,11 @@ switch (command) {
     const fromDt = opts.from ? new Date(opts.from) : null;
     const toDt = opts.to ? new Date(opts.to) : null;
 
+    const roleFilter = opts.role ? opts.role.toLowerCase() : null;
+    const roleType = roleFilter === "you" || roleFilter === "user" || roleFilter === "me" ? "user"
+      : roleFilter === "claude" || roleFilter === "assistant" ? "assistant"
+      : roleFilter;
+
     const results = [];
     for (const info of getAllSessions()) {
       for (const msg of loadSession(info.path)) {
@@ -164,6 +171,7 @@ switch (command) {
         if (dateFilter && ts.toISOString().slice(0, 10) !== dateFilter) continue;
         if (fromDt && ts < fromDt) continue;
         if (toDt && ts > toDt) continue;
+        if (roleType && msg.type !== roleType) continue;
 
         const content = extractText(msg.message?.content || "");
         if (query && !content.toLowerCase().includes(query)) continue;

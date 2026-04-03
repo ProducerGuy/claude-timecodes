@@ -1,6 +1,6 @@
-# Claude Code Timestamp Issues — Community Requests
+# Claude Code Timestamp & Speaker Label Issues — Community Requests
 
-21 issues filed (9 open, 12 closed as duplicates). Zero official Anthropic responses on any of them.
+25 issues filed. Zero official Anthropic responses on any of them.
 
 ## Open Issues
 
@@ -15,6 +15,8 @@
 | [#32495](https://github.com/anthropics/claude-code/issues/32495) | Expose timestamps for elapsed time | @mgaglianoupgrade | 2026-03-09 | **1** | Claude can't compute elapsed time without message timestamps. |
 | [#41389](https://github.com/anthropics/claude-code/issues/41389) | Add timestamps to conversation context | @klappenbach | 2026-03-31 | **0** | Timestamps for "what did I work on yesterday?" and stale tool result detection. |
 | [#41072](https://github.com/anthropics/claude-code/issues/41072) | Show timestamps on chat messages | @jasonnickel | 2026-03-30 | **0** | HH:MM timestamp next to each message bubble. |
+| [#35090](https://github.com/anthropics/claude-code/issues/35090) | Speaker labels in session transcripts | @cumberland-laboratories | 2026-03-16 | **0** | Speaker labels showing who said what — `[Username]` vs `[Claude Opus 4.6]`. Treats conversations as proper documents. |
+| [#42685](https://github.com/anthropics/claude-code/issues/42685) | Can't tell who said what | @saleemo11 | 2026-04-02 | **0** | "I have to mentally parse every line to figure out who said what." |
 
 ## Closed Issues (duplicates/stale — same request, unfulfilled)
 
@@ -32,6 +34,8 @@
 | [#18551](https://github.com/anthropics/claude-code/issues/18551) | Timestamps in message metadata | @wolfkevin | 2026-01-16 | Detect time gaps, know time of day, temporal context. |
 | [#23655](https://github.com/anthropics/claude-code/issues/23655) | Inject local time into context | @NoRain211 | 2026-02-06 | Like other agentic environments do by default. |
 | [#32949](https://github.com/anthropics/claude-code/issues/32949) | Per-message timestamps in conversation view | @pdej7 | 2026-03-10 | Correlate with deploys, CI runs, API usage. |
+| [#39902](https://github.com/anthropics/claude-code/issues/39902) | Timestamps + speaker differentiation | @armian10 | 2026-03-27 | Timestamps AND different labels for user vs assistant. |
+| [#16565](https://github.com/anthropics/claude-code/issues/16565) | Turn IDs with role labels | @raybenchen | 2026-01-07 | `USER:` / `CLAUDE:` labels on messages. Auto-closed for inactivity. |
 
 ## Coverage
 
@@ -58,5 +62,9 @@
 | [#31271](https://github.com/anthropics/claude-code/issues/31271) | Correlate activity across windows | **Yes** | Timestamps are absolute with timezone. Same message shows same time regardless of which window you're in. |
 | [#32949](https://github.com/anthropics/claude-code/issues/32949) | Correlate with deploys, CI runs, API usage | **Yes** | Second-precision timestamps with timezone. `--format iso` for machine-parseable output. |
 | [#18582](https://github.com/anthropics/claude-code/issues/18582) | Expose timestamps to Claude for elapsed time | **Yes** | Same as #32495. |
+| [#35090](https://github.com/anthropics/claude-code/issues/35090) | Speaker labels on messages | **Yes** | Every `systemMessage` shows `You ·` or `Claude ·` before the timecode. Tool calls show `Claude · [time] · Bash/Edit/etc`. CLI and web viewer color-code by speaker. `search --role` filters by speaker. |
+| [#42685](https://github.com/anthropics/claude-code/issues/42685) | Can't tell who said what | **Yes** | Speaker labels on every live timestamp. CLI `view` shows `You:` / `Claude:` with color coding. |
+| [#39902](https://github.com/anthropics/claude-code/issues/39902) | Timestamps + speaker differentiation | **Yes** | Both — timecodes with speaker labels on every exchange. |
+| [#16565](https://github.com/anthropics/claude-code/issues/16565) | Role labels on messages | **Yes** | `You` / `Claude` labels on every timestamp. Turn IDs are unnecessary — the timecode is the identifier. |
 
-**Summary:** 21 of 21 addressed. Every exchange gets a visible timestamp via `systemMessage` hooks. The only cosmetic limitation is positioning — timestamps appear as system messages rather than right-aligned inside message bubbles, which would require Anthropic to modify Claude Code's renderer.
+**Summary:** 25 of 25 addressed. Every exchange gets a visible timestamp with speaker label via `systemMessage` hooks. The only cosmetic limitation is positioning — timestamps appear as system messages rather than right-aligned inside message bubbles, which would require Anthropic to modify Claude Code's renderer.

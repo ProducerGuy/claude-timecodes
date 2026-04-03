@@ -19,12 +19,12 @@ if [ -f "$CONFIG" ]; then
 fi
 
 if [ "$EVENT" = "UserPromptSubmit" ]; then
-  jq -n --arg ctx "[TIMECODE $LOCAL_TC]" --arg msg "$LOCAL_TC" \
+  jq -n --arg ctx "[TIMECODE $LOCAL_TC]" --arg msg "You · $LOCAL_TC" \
     '{"additionalContext": $ctx, "systemMessage": $msg}'
 elif [ "$EVENT" = "Stop" ]; then
-  jq -n --arg msg "$LOCAL_TC" '{"systemMessage": $msg}'
+  jq -n --arg msg "Claude · $LOCAL_TC" '{"systemMessage": $msg}'
 elif [ "$EVENT" = "PostToolUse" ]; then
   TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
-  jq -n --arg ctx "[TIMECODE $LOCAL_TC] tool:$TOOL" --arg msg "$LOCAL_TC $TOOL" \
+  jq -n --arg ctx "[TIMECODE $LOCAL_TC] tool:$TOOL" --arg msg "Claude · $LOCAL_TC · $TOOL" \
     '{"additionalContext": $ctx, "systemMessage": $msg}'
 fi

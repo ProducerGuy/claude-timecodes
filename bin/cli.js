@@ -13,6 +13,7 @@ import {
   formatTimecode,
   formatDuration,
   findSessionFile,
+  formatModelName,
 } from "../lib/sessions.js";
 import { yellow, green, blue, cyan, dim, bold, reset } from "../lib/colors.js";
 import { getDisplayName } from "../lib/config.js";
@@ -149,7 +150,7 @@ switch (command) {
       const ts = utcToLocal(msg.timestamp);
       const tc = fmtTC(ts, fmt);
       const content = extractText(msg.message?.content || "");
-      const role = msg.type === "user" ? USER_NAME : "Claude";
+      const role = msg.type === "user" ? USER_NAME : formatModelName(msg.message?.model);
       const roleColor = msg.type === "user" ? green : blue;
 
       console.log(`\n${yellow}[${tc}]${reset} ${roleColor}${bold}${role}:${reset}`);
@@ -190,7 +191,7 @@ switch (command) {
         const content = extractText(msg.message?.content || "");
         if (query && !content.toLowerCase().includes(query)) continue;
 
-        results.push({ ts, type: msg.type, content, sessionId: info.sessionId });
+        results.push({ ts, type: msg.type, content, sessionId: info.sessionId, model: msg.message?.model });
       }
     }
 
@@ -211,7 +212,7 @@ switch (command) {
       }
       const tc = fmtTC(r.ts, fmt);
       const roleColor = r.type === "user" ? green : blue;
-      const role = r.type === "user" ? USER_NAME : "Claude";
+      const role = r.type === "user" ? USER_NAME : formatModelName(r.model);
       console.log(`  ${yellow}[${tc}]${reset} ${roleColor}${role}:${reset} ${truncate(r.content, 150)}`);
     }
     console.log();
@@ -271,7 +272,7 @@ switch (command) {
       const content = extractText(msg.message?.content || "");
       const marker = i === bestIdx ? " >>> " : "     ";
       const roleColor = msg.type === "user" ? green : blue;
-      const role = msg.type === "user" ? USER_NAME : "Claude";
+      const role = msg.type === "user" ? USER_NAME : formatModelName(msg.message?.model);
 
       console.log(`${marker}${yellow}[${tc}]${reset} ${roleColor}${bold}${role}:${reset}`);
       console.log(`       ${truncate(content, 200)}`);
@@ -308,7 +309,7 @@ switch (command) {
     for (const msg of messages) {
       const ts = utcToLocal(msg.timestamp);
       const tc = formatTimecode(ts);
-      const role = msg.type === "user" ? USER_NAME : "Claude";
+      const role = msg.type === "user" ? USER_NAME : formatModelName(msg.message?.model);
       const content = extractText(msg.message?.content || "");
       lines.push(`### \`[${tc}]\` **${role}**`, "", content, "");
     }

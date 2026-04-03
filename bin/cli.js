@@ -13,6 +13,9 @@ import {
   findSessionFile,
 } from "../lib/sessions.js";
 import { Y, G, B, C, DIM, BOLD, R } from "../lib/colors.js";
+import { getDisplayName } from "../lib/config.js";
+
+const USER_NAME = getDisplayName();
 
 const HELP = `
 Claude Timecodes — timestamped conversation history for Claude Code
@@ -29,6 +32,7 @@ Commands:
   install               Install timestamp hooks into Claude Code
   uninstall             Remove timestamp hooks from Claude Code
   config                Show current config
+  config --name <NAME>  Set display name
   config --timezone <TZ> Set home timezone (e.g. America/New_York)
 
 Options:
@@ -71,6 +75,7 @@ function parseOpts(positionals = 0) {
     else if (f === "-p" || f === "--port") opts.port = parseInt(flags[++i]);
     else if (f === "--format") opts.format = flags[++i];
     else if (f === "--timezone") opts.timezone = flags[++i];
+    else if (f === "--name") opts.name = flags[++i];
     else if (f === "--role" || f === "-r") opts.role = flags[++i];
     else pos.push(f);
   }
@@ -135,7 +140,7 @@ switch (command) {
       const ts = utcToLocal(msg.timestamp);
       const tc = fmtTC(ts, fmt);
       const content = extractText(msg.message?.content || "");
-      const role = msg.type === "user" ? "You" : "Claude";
+      const role = msg.type === "user" ? USER_NAME : "Claude";
       const roleColor = msg.type === "user" ? G : B;
 
       console.log(`\n${Y}[${tc}]${R} ${roleColor}${BOLD}${role}:${R}`);
@@ -197,7 +202,7 @@ switch (command) {
       }
       const tc = fmtTC(r.ts, fmt);
       const roleColor = r.type === "user" ? G : B;
-      const role = r.type === "user" ? "You" : "Claude";
+      const role = r.type === "user" ? USER_NAME : "Claude";
       console.log(`  ${Y}[${tc}]${R} ${roleColor}${role}:${R} ${truncate(r.content, 150)}`);
     }
     console.log();
@@ -257,7 +262,7 @@ switch (command) {
       const content = extractText(msg.message?.content || "");
       const marker = i === bestIdx ? " >>> " : "     ";
       const roleColor = msg.type === "user" ? G : B;
-      const role = msg.type === "user" ? "You" : "Claude";
+      const role = msg.type === "user" ? USER_NAME : "Claude";
 
       console.log(`${marker}${Y}[${tc}]${R} ${roleColor}${BOLD}${role}:${R}`);
       console.log(`       ${truncate(content, 200)}`);
@@ -294,7 +299,7 @@ switch (command) {
     for (const msg of messages) {
       const ts = utcToLocal(msg.timestamp);
       const tc = formatTimecode(ts);
-      const role = msg.type === "user" ? "You" : "Claude";
+      const role = msg.type === "user" ? USER_NAME : "Claude";
       const content = extractText(msg.message?.content || "");
       lines.push(`### \`[${tc}]\` **${role}**`, "", content, "");
     }
@@ -320,17 +325,22 @@ switch (command) {
 
   case "install": {
     const { installHooks } = await import("../lib/install.js");
-    const { loadConfig, saveConfig, getSystemTimezone } = await import("../lib/config.js");
+    const { loadConfig, saveConfig, getSystemTimezone, detectDisplayName } = await import("../lib/config.js");
     installHooks();
     const config = loadConfig();
     if (!config._initialized) {
       const tz = getSystemTimezone();
       config.homeTimezone = tz;
+      const name = detectDisplayName();
+      if (name) config.displayName = name;
       config._initialized = true;
       saveConfig(config);
       const abbr = new Date().toLocaleString("en-US", { timeZoneName: "short", timeZone: tz }).split(" ").pop();
-      console.log(`\nHome timezone set to ${tz} (${abbr})`);
-      console.log(`Change anytime with: claude-timecodes config --timezone America/New_York`);
+      console.log(`\nDisplay name: ${name || "You"}`);
+      console.log(`Home timezone: ${tz} (${abbr})`);
+      console.log(`\nChange anytime with:`);
+      console.log(`  claude-timecodes config --name "Your Name"`);
+      console.log(`  claude-timecodes config --timezone America/New_York`);
     }
     break;
   }
@@ -342,10 +352,17 @@ switch (command) {
   }
 
   case "config": {
-    const { loadConfig, saveConfig, getSystemTimezone } = await import("../lib/config.js");
+    const { loadConfig, saveConfig, getSystemTimezone, getDisplayName } = await import("../lib/config.js");
     const { opts } = parseOpts(0);
+    let changed = false;
+    const config = loadConfig();
+
+    if (opts.name) {
+      config.displayName = opts.name;
+      changed = true;
+      console.log(`Display name set to ${opts.name}`);
+    }
     if (opts.timezone) {
-      // Validate timezone
       try {
         Intl.DateTimeFormat("en-US", { timeZone: opts.timezone });
       } catch {
@@ -353,15 +370,17 @@ switch (command) {
         console.error("Examples: America/Chicago, America/New_York, Europe/London, Asia/Tokyo");
         process.exit(1);
       }
-      const config = loadConfig();
       config.homeTimezone = opts.timezone;
-      saveConfig(config);
+      changed = true;
       const abbr = new Date().toLocaleString("en-US", { timeZoneName: "short", timeZone: opts.timezone }).split(" ").pop();
       console.log(`Home timezone set to ${opts.timezone} (${abbr})`);
+    }
+    if (changed) {
+      saveConfig(config);
     } else {
-      const config = loadConfig();
       const sysTz = getSystemTimezone();
       const traveling = sysTz !== config.homeTimezone;
+      console.log(`Display name: ${getDisplayName()}`);
       console.log(`Home timezone: ${config.homeTimezone}`);
       console.log(`System timezone: ${sysTz}`);
       if (traveling) {

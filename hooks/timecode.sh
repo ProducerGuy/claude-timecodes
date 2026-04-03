@@ -4,9 +4,17 @@ INPUT=$(cat /dev/stdin)
 LOCAL_TC=$(date "+%Y-%m-%d %I:%M:%S %p %Z")
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty')
 
-# Check for home timezone config
+# Read config
 CONFIG="$HOME/.claude/timecodes.json"
+USER_NAME="You"
 if [ -f "$CONFIG" ]; then
+  # Display name
+  NAME=$(jq -r '.displayName // empty' "$CONFIG")
+  if [ -n "$NAME" ]; then
+    USER_NAME="$NAME"
+  fi
+
+  # Travel timezone
   HOME_TZ=$(jq -r '.homeTimezone // empty' "$CONFIG")
   SYS_TZ=$(date "+%Z")
   if [ -n "$HOME_TZ" ]; then
@@ -19,7 +27,7 @@ if [ -f "$CONFIG" ]; then
 fi
 
 if [ "$EVENT" = "UserPromptSubmit" ]; then
-  jq -n --arg ctx "[TIMECODE $LOCAL_TC]" --arg msg "You · $LOCAL_TC" \
+  jq -n --arg ctx "[TIMECODE $LOCAL_TC]" --arg msg "$USER_NAME · $LOCAL_TC" \
     '{"additionalContext": $ctx, "systemMessage": $msg}'
 elif [ "$EVENT" = "Stop" ]; then
   jq -n --arg msg "Claude · $LOCAL_TC" '{"systemMessage": $msg}'

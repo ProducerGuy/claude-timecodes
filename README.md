@@ -13,7 +13,7 @@ This fixes it.
 ## Install
 
 ```bash
-npx claude-timecodes install
+npx github:ProducerGuy/claude-timecodes install
 ```
 
 That's it. The installer:
@@ -139,7 +139,7 @@ claude-timecodes view <id> --format iso
 ## Uninstall
 
 ```bash
-npx claude-timecodes uninstall
+npx github:ProducerGuy/claude-timecodes uninstall
 ```
 
 Removes the hooks from settings.json. Your conversation data is untouched.

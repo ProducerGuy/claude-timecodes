@@ -43,11 +43,11 @@ if [ "$EVENT" = "SessionStart" ]; then
   fi
 elif [ "$EVENT" = "UserPromptSubmit" ]; then
   jq -n --arg ctx "[TIMECODE $LOCAL_TC]" --arg msg "$USER_NAME · $LOCAL_TC" \
-    '{"additionalContext": $ctx, "systemMessage": $msg}'
+    '{"hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": $ctx}, "systemMessage": $msg}'
 elif [ "$EVENT" = "Stop" ]; then
   jq -n --arg msg "$MODEL_LABEL · $LOCAL_TC" '{"systemMessage": $msg}'
 elif [ "$EVENT" = "PostToolUse" ]; then
   TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
   jq -n --arg ctx "[TIMECODE $LOCAL_TC] tool:$TOOL" --arg msg "$MODEL_LABEL · $LOCAL_TC · $TOOL" \
-    '{"additionalContext": $ctx, "systemMessage": $msg}'
+    '{"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": $ctx}, "systemMessage": $msg}'
 fi
